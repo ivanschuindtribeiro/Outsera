@@ -1,0 +1,20 @@
+{
+  "name": "outsera-qa-automation",
+  "version": "1.0.0",
+  "description": "Enterprise QA Automation Suite (API, E2E BDD, K6 Load)",
+  "main": "index.js",
+  "scripts": {
+    "test:api": "playwright test",
+    "test:api:report": "playwright show-report",
+    "test:e2e": "npx tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:perf": "k6 run src/performance/load-test.js",
+    "test:all": "npm run test:api && npm run test:e2e && npm run test:perf"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^10.3.1",
+    "@playwright/test": "^1.42.1",
+    "@types/node": "^20.11.24",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  }
+}

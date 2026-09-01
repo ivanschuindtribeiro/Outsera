@@ -1,0 +1,228 @@
+name: QA Automation Pipeline Outsera
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  test-suite:
+    name: Run All Automated Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Setup K6
+        uses: grafana/setup-k6-action@v1
+
+      # 1. API Tests
+      - name: 1. Run API Tests
+        id: api_step
+        run: npm run test:api
+        continue-on-error: true
+
+      # 2. E2E Tests
+      - name: 2. Run E2E Tests
+        id: e2e_step
+        run: npm run test:e2e
+        continue-on-error: true
+
+      # 3. K6 Load Tests
+      - name: 3. Run Performance Tests
+        id: k6_step
+        run: |
+          npx serverest@latest &
+          npx --yes wait-on http://localhost:3000/usuarios -t 30000
+          npm run test:perf
+        continue-on-error: true
+
+      # 4. Baixar histórico existente da branch gh-pages (defensivo)
+      - name: Fetch gh-pages history
+        if: always()
+        run: |
+          mkdir -p gh-pages-branch
+          git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-branch || echo "Branch gh-pages ainda não existe. Iniciando histórico do zero."
+
+      # 5. Organizar pasta atual e histórico permanente
+      - name: Build Historical Reports
+        if: always()
+        run: |
+          RUN_NUM="${{ github.run_number }}"
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+
+          # Prepara diretório de publicação
+          mkdir -p public/runs/${RUN_NUM}/api public/runs/${RUN_NUM}/e2e public/runs/${RUN_NUM}/k6
+          mkdir -p public/latest/api public/latest/e2e public/latest/k6
+
+          # Se existir histórico prévio no gh-pages, preserva
+          if [ -d "gh-pages-branch/runs" ]; then
+            cp -r gh-pages-branch/runs public/
+          fi
+          if [ -f "gh-pages-branch/history.json" ]; then
+            cp gh-pages-branch/history.json public/
+          else
+            echo "[]" > public/history.json
+          fi
+
+          # Copia artefatos da execução atual
+          [ -d "playwright-report" ] && cp -r playwright-report/* public/runs/${RUN_NUM}/api/ || true
+          
+          if [ -d "reports" ]; then
+            cp -r reports/* public/runs/${RUN_NUM}/e2e/ || true
+            first_html=$(find reports -name "*.html" | head -n 1)
+            [ -n "$first_html" ] && cp "$first_html" public/runs/${RUN_NUM}/e2e/index.html || true
+          fi
+
+          [ -f "load-test-report.html" ] && cp load-test-report.html public/runs/${RUN_NUM}/k6/index.html || true
+
+          # Copia também para o atalho /latest/
+          cp -r public/runs/${RUN_NUM}/* public/latest/
+
+          # Atualiza o arquivo history.json
+          node -e "
+            const fs = require('fs');
+            const file = 'public/history.json';
+            let data = [];
+            try { data = JSON.parse(fs.readFileSync(file, 'utf8')); } catch(e) {}
+            data.unshift({
+              run: '${RUN_NUM}',
+              date: '${TIMESTAMP}',
+              sha: '${{ github.sha }}'.substring(0, 7)
+            });
+            fs.writeFileSync(file, JSON.stringify(data, null, 2));
+          "
+
+          # Gera a Landing Page com menu de histórico
+          cat << 'EOF' > public/index.html
+          <!DOCTYPE html>
+          <html lang="pt-BR">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Outsera - QA Automation Hub</title>
+            <style>
+              body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; color: #c9d1d9; padding: 40px 20px; }
+              .container { max-width: 900px; margin: 0 auto; }
+              h1 { color: #58a6ff; text-align: center; margin-bottom: 30px; }
+              .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
+              .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; text-align: center; }
+              .card h2 { margin-top: 0; color: #f0f6fc; font-size: 1.25rem; }
+              .card p { color: #8b949e; font-size: 0.9rem; margin-bottom: 15px; }
+              .btn { display: inline-block; padding: 10px 20px; background: #238636; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
+              .btn:hover { background: #2ea043; }
+              .history-section { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; }
+              .history-section h3 { margin-top: 0; color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+              th, td { padding: 10px; text-align: left; border-bottom: 1px solid #21262d; font-size: 0.9rem; }
+              th { color: #8b949e; }
+              a.link { color: #58a6ff; text-decoration: none; margin-right: 12px; }
+              a.link:hover { text-decoration: underline; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>🚀 Outsera - QA Automation Hub</h1>
+              
+              <h2>Última Execução (Latest)</h2>
+              <div class="cards">
+                <div class="card">
+                  <h2>📡 API Contract & Integration</h2>
+                  <p>Playwright REST Test Suite</p>
+                  <a href="./latest/api/index.html" class="btn" target="_blank">Abrir Relatório</a>
+                </div>
+                <div class="card">
+                  <h2>🎭 E2E Web Cucumber</h2>
+                  <p>Playwright BDD Scenario Execution</p>
+                  <a href="./latest/e2e/index.html" class="btn" target="_blank">Abrir Relatório</a>
+                </div>
+                <div class="card">
+                  <h2>⚡ K6 Performance</h2>
+                  <p>Load & Thresholds Metrics</p>
+                  <a href="./latest/k6/index.html" class="btn" target="_blank">Abrir Relatório</a>
+                </div>
+              </div>
+
+              <div class="history-section">
+                <h3>📜 Histórico de Execuções Permanentes</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Build #</th>
+                      <th>Data / Hora</th>
+                      <th>Commit</th>
+                      <th>Relatórios Salvos</th>
+                    </tr>
+                  </thead>
+                  <tbody id="history-rows">
+                    <!-- Preenchido via script -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <script>
+              fetch('./history.json')
+                .then(res => res.json())
+                .then(data => {
+                  const tbody = document.getElementById('history-rows');
+                  tbody.innerHTML = data.map(item => `
+                    <tr>
+                      <td><strong>#${item.run}</strong></td>
+                      <td>${item.date}</td>
+                      <td><code>${item.sha}</code></td>
+                      <td>
+                        <a class="link" href="./runs/${item.run}/api/index.html" target="_blank">API</a>
+                        <a class="link" href="./runs/${item.run}/e2e/index.html" target="_blank">E2E</a>
+                        <a class="link" href="./runs/${item.run}/k6/index.html" target="_blank">K6</a>
+                      </td>
+                    </tr>
+                  `).join('');
+                })
+                .catch(err => console.error('Erro ao carregar histórico:', err));
+            </script>
+          </body>
+          </html>
+          EOF
+
+      # 6. Salvar arquivos permanentemente na branch gh-pages
+      - name: Deploy to gh-pages branch (Persistence)
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
+
+      # 7. Job Summary no GitHub Actions com Link do Dashboard
+      - name: Generate Job Summary
+        if: always()
+        run: |
+          PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          
+          echo "## 🚀 QA Execution Summary (#${{ github.run_number }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🌐 [Acessar Dashboard no GitHub Pages]($PAGES_URL)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Camada de Teste | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📡 API Tests | ${{ steps.api_step.outcome == 'success' && '✅ Sucesso' || '❌ Falha' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🎭 E2E Cucumber | ${{ steps.e2e_step.outcome == 'success' && '✅ Sucesso' || '❌ Falha' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚡ K6 Load Tests | ${{ steps.k6_step.outcome == 'success' && '✅ Sucesso' || '❌ Falha' }} |" >> $GITHUB_STEP_SUMMARY

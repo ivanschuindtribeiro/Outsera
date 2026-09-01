@@ -1,0 +1,87 @@
+name: QA Automação Pipeline Outsera
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  api-tests:
+    name: 1. API Contract & Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run API Tests
+        run: npm run test:api
+
+      - name: Upload API Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-api-report
+          path: playwright-report/
+          retention-days: 7
+
+  e2e-tests:
+    name: 2. E2E Web Cucumber Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E Tests
+        run: npm run test:e2e
+
+      - name: Upload E2E Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-e2e-report
+          path: reports/
+          retention-days: 7
+
+  load-tests:
+    name: 3. K6 Load & Performance Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Setup K6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Start Mock Server & Run Load Tests
+        run: |
+          npx serverest@latest &
+          npx --yes wait-on http://localhost:3000/usuarios -t 30000
+          npm run test:perf
+
+      - name: Upload K6 Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-load-report
+          path: load-test-report.html
+          retention-days: 7
