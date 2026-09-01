@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Outsera - QA Automation Hub</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; color: #c9d1d9; padding: 40px 20px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { color: #58a6ff; text-align: center; margin-bottom: 30px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; text-align: center; }
+    .card h2 { margin-top: 0; color: #f0f6fc; font-size: 1.25rem; }
+    .card p { color: #8b949e; font-size: 0.9rem; margin-bottom: 15px; }
+    .btn { display: inline-block; padding: 10px 20px; background: #238636; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
+    .btn:hover { background: #2ea043; }
+    .history-section { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; }
+    .history-section h3 { margin-top: 0; color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #21262d; font-size: 0.9rem; }
+    th { color: #8b949e; }
+    a.link { color: #58a6ff; text-decoration: none; margin-right: 12px; }
+    a.link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Outsera - QA Automation Hub</h1>
+    
+    <h2>Última Execução (Latest)</h2>
+    <div class="cards">
+      <div class="card">
+        <h2>📡 API Contract & Integration</h2>
+        <p>Playwright REST Test Suite</p>
+        <a href="./latest/api/index.html" class="btn" target="_blank">Abrir Relatório</a>
+      </div>
+      <div class="card">
+        <h2>🎭 E2E Web Cucumber</h2>
+        <p>Playwright BDD Scenario Execution</p>
+        <a href="./latest/e2e/index.html" class="btn" target="_blank">Abrir Relatório</a>
+      </div>
+      <div class="card">
+        <h2>⚡ K6 Performance</h2>
+        <p>Load & Thresholds Metrics</p>
+        <a href="./latest/k6/index.html" class="btn" target="_blank">Abrir Relatório</a>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <h3>📜 Histórico de Execuções Permanentes</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Build #</th>
+            <th>Data / Hora</th>
+            <th>Commit</th>
+            <th>Relatórios Salvos</th>
+          </tr>
+        </thead>
+        <tbody id="history-rows">
+          <!-- Preenchido via script -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    fetch('./history.json')
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById('history-rows');
+        tbody.innerHTML = data.map(item => `
+          <tr>
+            <td><strong>#${item.run}</strong></td>
+            <td>${item.date}</td>
+            <td><code>${item.sha}</code></td>
+            <td>
+              <a class="link" href="./runs/${item.run}/api/index.html" target="_blank">API</a>
+              <a class="link" href="./runs/${item.run}/e2e/index.html" target="_blank">E2E</a>
+              <a class="link" href="./runs/${item.run}/k6/index.html" target="_blank">K6</a>
+            </td>
+          </tr>
+        `).join('');
+      })
+      .catch(err => console.error('Erro ao carregar histórico:', err));
+  </script>
+</body>
+</html>

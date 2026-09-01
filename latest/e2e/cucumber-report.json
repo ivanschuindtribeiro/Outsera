@@ -1,0 +1,367 @@
+[
+  {
+    "description": "",
+    "elements": [
+      {
+        "description": "",
+        "id": "fluxo-de-autenticação-e-checkout-e2e;realizar-compra-completa-com-dados-válidos",
+        "keyword": "Cenário",
+        "line": 8,
+        "name": "Realizar compra completa com dados válidos",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 407590644
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Dado ",
+            "line": 6,
+            "name": "que o usuário acessa a página inicial do e-commerce",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:11"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 325710305
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Quando ",
+            "line": 9,
+            "name": "insere o usuário \"standard_user\" e a senha \"secret_sauce\"",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:18"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 272309752
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "E ",
+            "line": 10,
+            "name": "clica no botão de login",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:22"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 205389
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Então ",
+            "line": 11,
+            "name": "deve visualizar a lista de produtos",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:26"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 29062093
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Quando ",
+            "line": 12,
+            "name": "adiciona o produto \"Sauce Labs Backpack\" ao carrinho",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:30"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 54745992
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "E ",
+            "line": 13,
+            "name": "vai para o carrinho e inicia o checkout",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:34"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 108649895
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "E ",
+            "line": 14,
+            "name": "preenche o formulário com \"QA\", \"Tester\" e \"86000-000\"",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:39"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 43429497
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "E ",
+            "line": 15,
+            "name": "confirma e finaliza a compra",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:43"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 103086967
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Então ",
+            "line": 16,
+            "name": "a mensagem \"Thank you for your order!\" deve ser exibida",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:48"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 19094133
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 72365131
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "fluxo-de-autenticação-e-checkout-e2e;tentativa-de-login-com-senha-incorreta",
+        "keyword": "Cenário",
+        "line": 18,
+        "name": "Tentativa de login com senha incorreta",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 206213503
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Dado ",
+            "line": 6,
+            "name": "que o usuário acessa a página inicial do e-commerce",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:11"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 304144816
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Quando ",
+            "line": 19,
+            "name": "insere o usuário \"standard_user\" e a senha \"senha_invalida\"",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:18"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 241622036
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "E ",
+            "line": 20,
+            "name": "clica no botão de login",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:22"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 325662
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Então ",
+            "line": 21,
+            "name": "a mensagem de erro \"Username and password do not match any user in this service\" deve ser exibida",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:52"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 11439980
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 52985457
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "fluxo-de-autenticação-e-checkout-e2e;tentativa-de-checkout-sem-informar-o-primeiro-nome",
+        "keyword": "Cenário",
+        "line": 23,
+        "name": "Tentativa de checkout sem informar o primeiro nome",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 213375383
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Dado ",
+            "line": 6,
+            "name": "que o usuário acessa a página inicial do e-commerce",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:11"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 264399923
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Quando ",
+            "line": 24,
+            "name": "insere o usuário \"standard_user\" e a senha \"secret_sauce\"",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:18"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 289093280
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "E ",
+            "line": 25,
+            "name": "clica no botão de login",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:22"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 129034
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "E ",
+            "line": 26,
+            "name": "adiciona o produto \"Sauce Labs Backpack\" ao carrinho",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:30"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 52741479
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "E ",
+            "line": 27,
+            "name": "vai para o carrinho e inicia o checkout",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:34"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 101483578
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "E ",
+            "line": 28,
+            "name": "preenche o formulário com \"\", \"Tester\" e \"86000-000\"",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:39"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 24781968
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "E ",
+            "line": 29,
+            "name": "tenta continuar",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:56"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 57984336
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Então ",
+            "line": 30,
+            "name": "a mensagem de erro no checkout \"Error: First Name is required\" deve ser exibida",
+            "match": {
+              "location": "src/e2e/steps/checkoutSteps.ts:60"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 4909642
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 66695510
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      }
+    ],
+    "id": "fluxo-de-autenticação-e-checkout-e2e",
+    "line": 3,
+    "keyword": "Funcionalidade",
+    "name": "Fluxo de Autenticação e Checkout E2E",
+    "tags": [],
+    "uri": "src/e2e/features/checkout.feature"
+  }
+]
